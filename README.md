@@ -1,5 +1,5 @@
 # Minotaur the Mintoor
-Minotaur is a reprogrammable, cli-configurable NFT minting bot that can also create wallets in batch and share coins in between.
+Minotaur is an NFT minting bot that can easily be reconfigured for different contracts. It can also create wallets in batch and share coins in between.
 
 ## Setup
 1.  `git clone git@github.com:eyusufatik/Minotaur-the-Mintoor.git`
