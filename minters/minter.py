@@ -31,15 +31,15 @@ class Minter(ABC):
     def is_mint_ready(self) -> bool:
         pass
 
-    def pre_mint(self) -> dict:
+    def pre_mint(self):
         """(Optional) Run before mint function is called"""
         pass
 
     @abstractmethod
-    def mint(self) -> dict:
+    def mint(self):
         """Run when it is time for minting. Child classes should build the transaction and use the sign_and_send_tx function."""
         pass
 
-    def post_mint(self) -> dict:
+    def post_mint(self):
         """(Optional) Run after mint funcgtion is called"""
         pass
