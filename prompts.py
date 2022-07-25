@@ -13,14 +13,14 @@ def main_prompt(clear=False, msg=""):
         os.system('cls' if os.name == 'nt' else 'clear')
     
 
-    my_print("1. Start minting\n2. Configure\n3. Create batch account\n4. Share avax between accounts")
+    my_print("1. Start minting\n2. Configure\n3. Create batch account\n4. Share coins between accounts\n5. Gather coins on an account")
 
     if msg != "":
         my_print(msg)
 
     is_int, answer = get_int_answer()
 
-    if not validate_number_selection(4, answer):
+    if not validate_number_selection(5, answer):
         return main_prompt(True, "\nChoose 1 or 2.")
     elif answer == 1:
         vars.mint_manager.start_minting(vars.acc_manager)
@@ -30,6 +30,8 @@ def main_prompt(clear=False, msg=""):
         return create_account_prompt()
     elif answer == 4:
         return share_coin_prompt()
+    elif answer == 5:
+        return gather_coin_prompt()
 
 
 
@@ -318,3 +320,53 @@ def share_coin_prompt(msg="", sender_selection = None, min_amount=None):
             my_print("Coins shared successfully!")
             sleep(1.5)
             return main_prompt(True)
+
+@clear_on_entry
+def gather_coin_prompt(msg=""):
+    my_print("Current state of accounts:")
+    web3: Web3 = vars.acc_manager.web3
+    account_to_balance = {}
+    accounts = vars.acc_manager.get_account_list()
+    for index, acc in enumerate(accounts):
+        address = vars.acc_manager.get_address(acc)
+        balance = web3.eth.get_balance(address)
+        account_to_balance[acc] = balance
+        my_print(f"{index + 1}. {address} { web3.fromWei(balance, 'ether') }")
+
+    receiver_selection = None
+
+    my_print("Select account that'll receive coins. (Type stop to go back to the main prompt.)")
+
+    if msg != "":
+        my_print(msg)
+        msg = ""
+
+    is_int, answer = get_int_answer()
+
+    if not is_int and answer == "stop":
+        return main_prompt(True)
+    elif validate_number_selection(len(accounts), answer):
+        receiver_selection = answer - 1
+    else:
+        return gather_coin_prompt(f"\nChoose [1-{len(accounts)}]")
+
+    total_send_cost = web3.toWei(21000*26, "gwei") # 26 gas costs * 21000 gas
+    receiver_address = vars.acc_manager.get_address(accounts[receiver_selection])
+    for index, acc in enumerate(accounts):
+        if index != receiver_selection:
+            address = vars.acc_manager.get_address(acc)
+            tx = {
+                'nonce': web3.eth.get_transaction_count(address),
+                'to': receiver_address,
+                'value': account_to_balance[acc] - total_send_cost,
+                'gasPrice': web3.toWei(26, "gwei"),
+                'from': address,
+                'gas': 21000,
+                'chainId': web3.eth.chain_id
+            }
+            signed_tx = web3.eth.account.sign_transaction(tx, private_key=acc)
+            web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+   
+    my_print("Coins gathered successfully!")
+    sleep(1.5)
+    return main_prompt(True)
