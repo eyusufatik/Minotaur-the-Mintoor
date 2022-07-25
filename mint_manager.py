@@ -1,6 +1,7 @@
 import importlib
 import json
 from threading import Thread
+from time import sleep
 
 from dotenv import dotenv_values, set_key
 from web3 import Web3
@@ -109,7 +110,7 @@ class MintManager():
         minter.pre_everything()
 
         while not minter.is_mint_ready():
-            pass
+            sleep(0.00000001)
 
         minter.pre_mint()
 
