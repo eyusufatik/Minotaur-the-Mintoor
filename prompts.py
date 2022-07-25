@@ -354,18 +354,19 @@ def gather_coin_prompt(msg=""):
     receiver_address = vars.acc_manager.get_address(accounts[receiver_selection])
     for index, acc in enumerate(accounts):
         if index != receiver_selection:
-            address = vars.acc_manager.get_address(acc)
-            tx = {
-                'nonce': web3.eth.get_transaction_count(address),
-                'to': receiver_address,
-                'value': account_to_balance[acc] - total_send_cost,
-                'gasPrice': web3.toWei(26, "gwei"),
-                'from': address,
-                'gas': 21000,
-                'chainId': web3.eth.chain_id
-            }
-            signed_tx = web3.eth.account.sign_transaction(tx, private_key=acc)
-            web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+            if account_to_balance[acc] > 0:
+                address = vars.acc_manager.get_address(acc)
+                tx = {
+                    'nonce': web3.eth.get_transaction_count(address),
+                    'to': receiver_address,
+                    'value': account_to_balance[acc] - total_send_cost,
+                    'gasPrice': web3.toWei(26, "gwei"),
+                    'from': address,
+                    'gas': 21000,
+                    'chainId': web3.eth.chain_id
+                }
+                signed_tx = web3.eth.account.sign_transaction(tx, private_key=acc)
+                web3.eth.send_raw_transaction(signed_tx.rawTransaction)
    
     my_print("Coins gathered successfully!")
     sleep(1.5)
